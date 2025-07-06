@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miramhoo Product Catalog</title>
+
+    <!-- 主 favicon（PNG 格式，适用于大多数现代浏览器） -->
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/prQBsNSv/Miramhoo-Main.png">
+    
+    <!-- 备用 ICO 格式（如果未来需要兼容旧浏览器，可以额外提供 ICO 文件） -->
+    <!-- <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
+    
+    <!-- 苹果设备（iOS/Safari）专用图标（可选） -->
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/prQBsNSv/Miramhoo-Main.png">
+
+
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        .product-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .product-title {
+            font-size: 1.5rem;
+            margin: 0;
+            color: #333;
+        }
+        .product-price {
+            font-size: 1.2rem;
+            color: #e63946;
+            font-weight: bold;
+        }
+        .swiper {
+            width: 100%;
+            height: 300px;
+        }
+        .swiper-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+        }
+        .swiper-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        .swiper-slide img:hover {
+            transform: scale(1.02);
+        }
+        /* Modal styles */
+        .product-modal .modal-img {
+            max-height: 70vh;
+            width: auto;
+            margin: 0 auto;
+            display: block;
+        }
+        .product-modal .modal-body {
+            padding: 20px;
+        }
+        .product-modal .product-details {
+            margin-top: 20px;
+        }
+        .currency {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .not-found {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center my-5">Miramhoo Product Catalog</h1>
+        <div class="row" id="product-container">
+            <!-- Products will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal fade product-modal" id="productModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="" class="modal-img" id="modalProductImage">
+                    <div class="product-details">
+                        <div class="price mb-2">
+                            <strong>Price: </strong>
+                            <span id="modalProductPrice"></span>
+                            <span id="modalProductCurrency"></span>
+                        </div>
+                        <div class="description">
+                            <strong>Description: </strong>
+                            <p id="modalProductDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <script>
+        // Product data from ProductInfo.txt
+        const productData =[ 
+           {imageUrl: "https://i.postimg.cc/sXh8bJHf/12-D-HIFU-001.jpg", price: "212.53", currency: "$", detailed: "Inner Ball Roller Body Shaping Slimming Machine Roller Massage Fat Reduction 8d Roller Lymphatic Drainage Machine Endorsfera Big handle For body,Smaller Handle for face Vertival model and Portable Size model is available"} 
+, 
+           {imageUrl: "https://i.postimg.cc/XvXtkWwC/12-D-HIFU-002.jpg", price: "212.53", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/6QSgHP01/12-D-HIFU-003.jpg", price: "212.53", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/WbnKRz8Z/Body-Roller-machine-001.png", price: "369.21", currency: "€", detailed: "AAAA Inner Ball Roller Body Shaping Slimming Machine Roller Massage Fat Reduction 8d Roller Lymphatic Drainage Machine Endorsfera Big handle For body,Smaller Handle for face Vertival model and Portable Size model is available"} 
+, 
+           {imageUrl: "https://i.postimg.cc/RV98bK79/Body-Roller-machine-002.png", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/gjb5p61V/Body-Roller-machine-003.jpg", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/br05wwjK/Body-Roller-machine-004.png", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/cHw9FL6r/Cold-Plasma-001.png", price: "445.6", currency: "$", detailed: "XXXX"} 
+, 
+           {imageUrl: "https://i.postimg.cc/057FfcJc/Cold-Plasma-002.png", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/Gmg52fZh/Functional-LED-001.jpg", price: "234.64", currency: "€", detailed: "XXXXXX"} 
+, 
+           {imageUrl: "https://i.postimg.cc/pLLSPvc6/Functional-LED-002.jpg", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/rpdYtJkG/Functional-LED-003.jpg", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/Kc7pLjdW/Functional-LED-004.jpg", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/LsrQk19c/G5-Body-massage-001.jpg", price: "334.5", currency: "€", detailed: "XXX"} 
+, 
+           {imageUrl: "https://i.postimg.cc/C54vVrG0/G5-Body-massage-002.png", price: "", currency: "", detailed: ""} 
+, 
+           {imageUrl: "https://i.postimg.cc/tJbrwGVD/G5-Body-massage-003.jpg", price: "", currency: "", detailed: ""} 
+] 
+ ;
+
+        // Group products by name
+        const groupedProducts = {};
+        productData.forEach(item => {
+            // Extract product name from URL (format: productName-number.jpg)
+            const urlParts = item.imageUrl.split('/').pop().split('-');
+            const productName = urlParts.slice(0, -1).join('-');
+            
+            if (!groupedProducts[productName]) {
+                groupedProducts[productName] = {
+                    name: productName,
+                    price: item.price,
+                    currency: item.currency,
+                    images: []
+                };
+            }
+            groupedProducts[productName].images.push(item.imageUrl);
+        });
+
+        // Render products
+        const productContainer = document.getElementById('product-container');
+        Object.values(groupedProducts).forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'col-md-6 col-lg-4';
+            productCard.innerHTML = `
+                <div class="product-card">
+                    <div class="product-header">
+                        <h2 class="product-title">${product.name}</h2>
+                        <div class="product-price">
+                            ${product.price} <span class="currency">${product.currency}</span>
+                        </div>
+                    </div>
+                    <div class="swiper">
+                        <div class="swiper-wrapper">
+                            ${product.images.map(img => `
+                                <div class="swiper-slide">
+                                    <img src="${img.replace('http://', 'https://')}" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="handleImageError(this)" alt="${product.name}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${product.images.length > 1 ? `
+                        <div class="swiper-pagination"></div>
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            productContainer.appendChild(productCard);
+        });
+
+        // Image error handler
+        function handleImageError(img) {
+            console.error('Failed to load image:', img.src);
+            if (img.parentElement) {
+                img.parentElement.innerHTML = `
+                    <div class="not-found">
+                        <p>not find product image</p>
+                        <small>URL: ${img.src}</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize all swipers and image interactions
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add click and double click handlers to all product images
+            document.querySelectorAll('.swiper-slide img').forEach(img => {
+                // Click to enlarge
+                img.addEventListener('click', function() {
+                    this.style.transform = this.style.transform === 'scale(1.5)' ? 'scale(1)' : 'scale(1.5)';
+                });
+
+                // Double click to show modal
+                img.addEventListener('dblclick', function() {
+                    const imgUrl = this.src;
+                    const productName = this.alt;
+                    
+                    // Find product group data
+                    const productGroup = groupedProducts[productName];
+                    const firstImageInGroup = productData.find(p => p.imageUrl === productGroup.images[0]);
+                    
+                    // Set modal content
+                    document.getElementById('productModalTitle').textContent = productName;
+                    document.getElementById('modalProductImage').src = imgUrl;
+                    document.getElementById('modalProductPrice').textContent = productGroup.price || '';
+                    document.getElementById('modalProductCurrency').textContent = productGroup.currency || '';
+                    document.getElementById('modalProductDescription').textContent = firstImageInGroup?.detailed || 'No description available';
+                    
+                    // Show modal
+                    const modal = new bootstrap.Modal(document.getElementById('productModal'));
+                    modal.show();
+                });
+            });
+
+            // Initialize swipers
+            const swipers = document.querySelectorAll('.swiper');
+            swipers.forEach(swiperEl => {
+                const slides = swiperEl.querySelectorAll('.swiper-slide');
+                const config = {
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    }
+                };
+                
+                // Only enable loop if enough slides
+                if (slides.length > 1) {
+                    config.loop = true;
+                }
+                
+                new Swiper(swiperEl, config);
+            });
+        });
+    </script>
+</body>
+</html>
